@@ -1,5 +1,5 @@
 -- Q1 Total Users & Growth Trends
-	--- What is the total number of users for LioCinema and Jotstar, and how do they compare in terms of growth trends (January–November 2024)?
+	--- What is the total number of users for LioCinema and Jotstar, and how do they compare in terms of growth trends (Januaryâ€“November 2024)?
 
 SELECT
     jot.jotstar_users,
@@ -96,7 +96,47 @@ ORDER BY
 
 -- Q4 Active vs. Inactive Users
  -- What percentage of LioCinema and Jotstar users are active vs. inactive? How do these rates vary by age group and subscription plan?
+SELECT 
+		age_group AS age,
+		subscription_plan AS Plans,
+		COUNT(CASE WHEN platform = 'Liocinema' AND new_subscription_plan IS NOT NULL THEN user_id END) AS active_users_liocinema,
+		COUNT(CASE WHEN platform = 'Liocinema' AND new_subscription_plan IS NULL THEN user_id END) AS Inactive_users_liocinema,
+		COUNT(CASE WHEN platform = 'Liocinema' THEN user_id END) AS total_liocinema_users,
+		ROUND(CAST(COUNT(CASE WHEN platform = 'Liocinema' AND new_subscription_plan IS NOT NULL THEN user_id END)*1.0 AS FLOAT)/NULLIF(COUNT(CASE WHEN platform = 'Liocinema' THEN user_id END),0)*100,2) AS 'Active users liocinema %' ,
+		ROUND(CAST(COUNT(CASE WHEN platform = 'Liocinema' AND new_subscription_plan IS NULL THEN user_id END)*1.0 AS FLOAT)/NULLIF(COUNT(CASE WHEN platform = 'Liocinema' THEN user_id END),0) *100,2) AS 'InActive users liocinema %',
+		COUNT(CASE WHEN platform = 'Jotstar' AND new_subscription_plan IS NOT NULL THEN user_id END) AS active_users_jotstar,
+		COUNT(CASE WHEN platform = 'Jotstar' AND new_subscription_plan IS NULL THEN user_id END) AS Inactive_users_jotstar,
+		COUNT(CASE WHEN platform = 'Jotstar' THEN user_id END) AS jotstar_users,
+		ROUND(CAST(COUNT(CASE WHEN platform = 'Jotstar' AND new_subscription_plan IS NOT NULL THEN user_id END)*1.0 AS FLOAT)/NULLIF(COUNT(CASE WHEN platform = 'Jotstar' THEN user_id END),0)*100,2) AS 'Active users jotstar %',
+		ROUND(CAST(COUNT(CASE WHEN platform = 'Jotstar'AND new_subscription_plan IS NULL THEN user_id END)*1.0 AS FLOAT)/NULLIF(COUNT(CASE WHEN platform = 'Jotstar' THEN user_id END),0) *100,2) AS 'InActive users jotstar %'
 
+FROM
+	(
+		SELECT
+				'Liocinema' AS platform,
+				age_group,
+				subscription_plan,
+				new_subscription_plan,
+				user_id
+		FROM
+				liocinema_db..subscribers
+
+		UNION ALL
+
+		SELECT
+				'Jotstar' AS platform,
+				age_group,
+				subscription_plan,
+				new_subscription_plan,
+				user_id
+		FROM
+				jotstar_db..subscribers
+) AS combined
+GROUP BY
+		age_group,
+		subscription_plan
+ORDER BY
+		Plans,age
 
 -- Q5 Watch Time Analysis
    --What is the average watch time for LioCinema vs. Jotstar during the analysis period? How do these compare by city tier and device type? 
